@@ -20,8 +20,8 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    void set_default_cards();
-    void setIconOnButton(QPushButton *button, clubButton club);
+    //void set_default_cards();
+   // void setIconOnButton(QPushButton *button, clubButton club);
     QVector<clubButton> randomGenerateButtonConfiguration(QVector<clubButton> clubs);
     ~MainWindow();
 
@@ -30,27 +30,13 @@ private slots:
 
     void on_pushButtonClear_clicked();
 
-    void on_pushButton_2_clicked(bool clicked);
+    void checkButtonClicked();
 
-    void on_pushButton_3_clicked(bool clicked);
-
-    void on_pushButton_4_clicked(bool clicked);
-
-    void on_pushButton_5_clicked(bool clicked);
-
-    void on_pushButton_7_clicked(bool clicked);
-
-    void on_pushButton_8_clicked(bool clicked);
-
-    void on_pushButton_9_clicked(bool clicked);
-
-    void on_pushButton_10_clicked(bool clicked);
-
-    void on_pushButton_6_clicked(bool checked);
-
-    void on_pushButton_11_clicked(bool checked);
-
-protected:
+    void setDefaultCards(QPushButton *button);
+    void setIconOnButton(QPushButton *button, clubButton club);
+    void setIconOnButtonWithRandomTeam();
+    void findingPairs();
+private:
     Ui::MainWindow *ui;
     QString championsBasic = "/Users/pawellos/memoryGame/pics/CL1.jpeg";
     QString inter = "/Users/pawellos/memoryGame/pics/inter.png";
