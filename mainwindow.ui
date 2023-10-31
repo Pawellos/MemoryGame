@@ -20,37 +20,13 @@
      <height>1182</height>
     </size>
    </property>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>330</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Push me</string>
-    </property>
-   </widget>
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>280</y>
-      <width>160</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout"/>
-   </widget>
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>330</y>
-      <width>171</width>
-      <height>31</height>
+      <x>280</x>
+      <y>530</y>
+      <width>161</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="markdown">
@@ -79,17 +55,17 @@ p, li { white-space: pre-wrap; }
      <string>Close</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButtonClear">
+   <widget class="QPushButton" name="pushButtonRestart">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>330</y>
-      <width>80</width>
-      <height>24</height>
+      <x>60</x>
+      <y>530</y>
+      <width>201</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>clear</string>
+     <string>Restart</string>
     </property>
    </widget>
    <widget class="QPushButton" name="Button1">
@@ -220,6 +196,16 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="textBrowserTimer">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>530</y>
+      <width>151</width>
+      <height>51</height>
+     </rect>
     </property>
    </widget>
   </widget>

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QTimer>
+#include <QTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,16 +30,29 @@ public:
 private slots:
     void on_pushButton_clicked();
 
-    void on_pushButtonClear_clicked();
+    void on_pushButtonRestart_clicked();
 
     void checkButtonClicked();
+    void startGame();
+    void gameOver();
+    void updateTime();
 
     void setDefaultCards(QPushButton *button);
     void setIconOnButton(QPushButton *button, clubButton club);
     void setIconOnButtonWithRandomTeam();
     void findingPairs();
 private:
+    int pairs = 0;
+    int counter = 0;
+    int clickCounter = 1;
+    QVector<int> pushedButtons;
+
+    QTimer *timer=new QTimer();
+    QTimer * t = new QTimer();
+    QTime time;
+
     Ui::MainWindow *ui;
+    MainWindow *nWin;
     QString championsBasic = "/Users/pawellos/memoryGame/pics/CL1.jpeg";
     QString inter = "/Users/pawellos/memoryGame/pics/inter.png";
     QString chelsea = "/Users/pawellos/memoryGame/pics/chelsea.png";
