@@ -13,28 +13,15 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-    teams = randomGenerateButtonConfiguration(clubs);
-
-    QPushButton *cardButtons[10];
-    // Cycle through locating the buttons
-    for(int i = 1; i <= 10; ++i){
-        QString butName = "Button" + QString::number(i);
-
-        // Get the buttons by name and add to array
-        cardButtons[i] = MainWindow::findChild<QPushButton *>(butName);
-        setDefaultCards(cardButtons[i]);
-        // When the button is released call num_pressed()
-        connect(cardButtons[i], SIGNAL(clicked()), this, SLOT(checkButtonClicked()));
-        connect(cardButtons[i], SIGNAL(clicked()), this, SLOT(setIconOnButtonWithRandomTeam()));
-        connect(cardButtons[i], SIGNAL(clicked()), this, SLOT(findingPairs()));
-      }
-    t->start(1000);
-    connect(t, &QTimer::timeout, this, &MainWindow::updateTime);
-    //timer->singleShot(10000, this, &MainWindow::gameOver);
+    connect(userInterface, &UserInterface::resetCardsSignal, this, &MainWindow::resetCardsSlot);
+    connect(userInterface, &UserInterface::notPairFoundSignal, this, &MainWindow::notPairFoundSlot);
+    connect(userInterface, &UserInterface::PairFoundSignal, this, &MainWindow::PairFoundSlot);
+    connect(userInterface, &UserInterface::endWinGameSignal, this, &MainWindow::endWinGameSlot);
     connect(timer, &QTimer::timeout, this, &MainWindow::gameOver);
-    timer->setSingleShot(true);
-    timer->start(62000); // 10000 ms to 10 sekund, można zmienić na 60000 dla 60 sekund
+    connect(t, &QTimer::timeout, this, &MainWindow::updateTime);
+
+    ui->setupUi(this);
+    startGame();
 }
 
 MainWindow::~MainWindow()
@@ -44,27 +31,44 @@ MainWindow::~MainWindow()
 
 void MainWindow::startGame()
 {
-    //ui->setupUi(this);
-    pairs = 0;
-    counter = 0;
-    clickCounter = 1;
-    pushedButtons.clear();
-
-    teams = randomGenerateButtonConfiguration(clubs);
-
-    QPushButton *cardButtons[10];
+    userInterface->setTeams(game->randomGenerateButtonConfiguration(userInterface->getClubs()));
     // Cycle through locating the buttons
     for(int i = 1; i <= 10; ++i){
         QString butName = "Button" + QString::number(i);
 
-     // Get the buttons by name and add to array
-        cardButtons[i] = MainWindow::findChild<QPushButton *>(butName);
-        setDefaultCards(cardButtons[i]);
+        // Get the buttons by name and add to array
+        QPushButton *cardButton = MainWindow::findChild<QPushButton *>(butName);
+        cardButtons.push_back(cardButton);
+        userInterface->setDefaultCards(cardButton);
         // When the button is released call num_pressed()
-        connect(cardButtons[i], SIGNAL(clicked()), this, SLOT(checkButtonClicked()));
-        connect(cardButtons[i], SIGNAL(clicked()), this, SLOT(setIconOnButtonWithRandomTeam()));
-        connect(cardButtons[i], SIGNAL(clicked()), this, SLOT(findingPairs()));
-        }
+        connect(cardButton, SIGNAL(clicked()), this, SLOT(checkButtonClicked()));
+        connect(cardButton, &QPushButton::clicked, [=]() {
+            userInterface->setIconOnButtonWithRandomTeam(cardButton); });
+      }
+    t->start(1000);
+
+    timer->setSingleShot(true);
+    timer->start(62000); // 10000 ms to 10 sekund, można zmienić na 60000 dla 60 sekund
+}
+
+void MainWindow::checkButtonClicked()
+{
+    QPushButton* buttonSender = (QPushButton *)sender(); // retrieve the button you have clicked
+    QString buttonNameText = buttonSender->objectName(); // retrive the text from the button clicked
+    qDebug() << buttonNameText;
+    ui->textBrowser->setText("clicked: " + QString::number(userInterface->getClickCounter()));
+    buttonSender->setEnabled(false);
+
+    if (userInterface->isCheckingPairs) {
+        return;
+    }
+
+    userInterface->isCheckingPairs = true;
+
+        QTimer::singleShot(800, [this]() {
+            userInterface->findingPairs(timer, t);
+            userInterface->isCheckingPairs = false;
+        });
 }
 
 void MainWindow::gameOver()
@@ -86,31 +90,19 @@ void MainWindow::updateTime()
     ui->textBrowserTimer->setText("Time left:  " + QString::number(countTime--));
 }
 
-
-
-void MainWindow::on_pushButton_clicked()
-{
-    qDebug() << "Pushed the button";
-    ui->textBrowser->setText("Hello world");
-    QMessageBox::information(this, "Tittle","Heey world");
-}
-
-
 void MainWindow::on_pushButtonRestart_clicked()
 {
     qDebug() << "clear all";
     ui->textBrowser->setText("");
-    pairs = 0;
-    counter = 0;
-    clickCounter = 1;
-    pushedButtons.clear();
-    teams = randomGenerateButtonConfiguration(clubs);
-    QPushButton *cardButtonToClear;
+    userInterface->setDefaultValues();
+    userInterface->setTeams(game->randomGenerateButtonConfiguration(userInterface->getClubs()));
     // Cycle through locating the buttons
     for(int i = 1; i <= 10; ++i){
         QString butName = "Button" + QString::number(i);
-        cardButtonToClear = MainWindow::findChild<QPushButton *>(butName);
-        setDefaultCards(cardButtonToClear);
+        QPushButton *cardButton = MainWindow::findChild<QPushButton *>(butName);
+        cardButtons.push_back(cardButton);
+
+        userInterface->setDefaultCards(cardButton);
     }
     if (timer->isActive()) {
         timer->stop();
@@ -125,95 +117,30 @@ void MainWindow::on_pushButtonRestart_clicked()
     t->start();
 }
 
+void MainWindow::resetCardsSlot(const QString& butNamePrev, const QString& butNameNext) {
+    QPushButton *prevButton = this->findChild<QPushButton *>(butNamePrev);
+    QPushButton *nextButton = this->findChild<QPushButton *>(butNameNext);
 
-void MainWindow::setDefaultCards(QPushButton *button){
-      setIconOnButton(button, Champions);
-      //button->setCheckable(true);
-      button->setEnabled(true);
+   // QTimer::singleShot(100, [this, prevButton, nextButton]() { // 1000 ms opóźnienia
 
+    userInterface->setIconOnButton(prevButton, {"/Users/pawellos/memoryGame/pics/CL1.jpeg", 165, 95});
+    userInterface->setIconOnButton(nextButton, {"/Users/pawellos/memoryGame/pics/CL1.jpeg", 165, 95});
+
+    prevButton->setEnabled(true);
+    nextButton->setEnabled(true);
+   //  });
 }
 
-void MainWindow::setIconOnButton(QPushButton *button, clubButton club){
-    button->setIcon(QIcon(club.clubName));
-    button->setIconSize(QSize(club.sizeX,club.sizeY));
+void MainWindow::notPairFoundSlot(){
+    QMessageBox::information(this, "Congrats","Sorry, not a pair. Try again!");
 }
 
-QVector<clubButton> MainWindow::randomGenerateButtonConfiguration(QVector<clubButton> clubs)
-{
-
- QVector<clubButton> clubTeams;
- for(clubButton & x : clubs)
-    clubTeams.push_back(x);
-
- auto rd = std::random_device {};
- auto rng = std::default_random_engine { rd() };
- std::shuffle(std::begin(clubTeams), std::end(clubTeams), rng);
-
- return clubTeams;
+void MainWindow::PairFoundSlot(){
+    QMessageBox::information(this, "Congrats","Woow great, You find pair !");
 }
 
-void MainWindow::checkButtonClicked()
-{
-    QPushButton* buttonSender = (QPushButton *)sender(); // retrieve the button you have clicked
-    QString buttonNameText = buttonSender->objectName(); // retrive the text from the button clicked
-    qDebug() << buttonNameText;
-    ui->textBrowser->setText("clicked: " + QString::number(clickCounter));
-    buttonSender->setEnabled(false);
+void MainWindow::endWinGameSlot(int clicks){
+      QMessageBox::information(this, "Congrats","Congrats !!! You win. You needed to win " + QString::number(clicks-1) + " clicks");
+
 }
-
-void MainWindow::setIconOnButtonWithRandomTeam(){
-    QPushButton *button = qobject_cast<QPushButton*>(sender());
-    QString buttonNameText = button->objectName();
-    QString onlyDigit = "";
-    for(const auto& c : buttonNameText){
-        if(c.isNumber()){
-         onlyDigit += c;
-        }
-    }
-    int buttonNumber = onlyDigit.toInt();
-    button->setIcon(QIcon(teams[buttonNumber-1].clubName));
-    button->setIconSize(QSize(teams[buttonNumber-1].sizeX,teams[buttonNumber-1].sizeY));
-    pushedButtons.push_back(buttonNumber);
-    counter++;
-    clickCounter++;
-}
-
-void MainWindow::findingPairs(){
-    if(counter == 2){
-        int previous = pushedButtons[0];
-        int next = pushedButtons[1];
-        qDebug() <<"prev =" << previous;
-        qDebug() <<"next =" << next;
-        QString butNamePrev = "Button" + QString::number(previous);
-        qDebug() <<"butNamePrev =" << butNamePrev;
-        QString butNameNext = "Button" + QString::number(next);
-        qDebug() <<"butNameNext =" << butNameNext;
-        QPushButton * prevButton = MainWindow::findChild<QPushButton *>(butNamePrev);
-        QPushButton * nextButton = MainWindow::findChild<QPushButton *>(butNameNext);
-
-        if(teams[previous-1].clubName == teams[next-1].clubName){
-         QMessageBox::information(this, "Congrats","Woow great, You find pair !");
-         pairs++;
-        }
-        else{
-            setIconOnButton(prevButton, teams[previous-1]);
-            setIconOnButton(nextButton, teams[next-1]);
-            prevButton->setEnabled(true);
-            nextButton->setEnabled(true);
-            QMessageBox::information(this, "Congrats","Sorry, not pair. Try again!");
-            setIconOnButton(prevButton, Champions);
-            setIconOnButton(nextButton, Champions);
-        }
-        counter = 0;
-        pushedButtons.clear();
-        qDebug() << pairs;
-
-        if(pairs == teams.size()/2){
-            timer->stop();
-            t->stop();
-            QMessageBox::information(this, "Congrats","Congrats !!! You win. You needed to win " + QString::number(clickCounter-1) + " clicks");
-        }
-    }
-}
-
 
