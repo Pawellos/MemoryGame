@@ -30,10 +30,10 @@ To install and run the game on your local machine, follow these steps:
 
 ## Screenshots
 
-![Game Start](https://github.com/Pawellos/MemoryGame/splitterClass/scrns/1.png)
-![Finding a Pair](https://github.com/Pawellos/MemoryGame/splitterClass/scrns/2.png)
-![Winning the Game](https://github.com/Pawellos/MemoryGame/splitterClass/scrns/3.png)
-![Game Over](https://github.com/Pawellos/MemoryGame/splitterClass/scrns/4.png)
+![Game Start](https://github.com/Pawellos/MemoryGame/blob/splitterClass/scrns/1.png)
+![Finding a Pair](https://github.com/Pawellos/MemoryGame/blob/splitterClass/scrns/2.png)
+![Winning the Game](https://github.com/Pawellos/MemoryGame/blob/splitterClass/scrns/3.png)
+![Game Over](https://github.com/Pawellos/MemoryGame/blob/splitterClass/scrns/4.png)
 
 ## Contributing
 
